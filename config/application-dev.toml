@@ -1,0 +1,35 @@
+# Development configuration: Microsoft Entra ID sign-in, the Oracle JDBC
+# End User Security Context provider, and a TCPS datasource authenticated with
+# an Azure service principal. Every placeholder is read from the environment;
+# see .env.example.
+
+# OAUTH
+[micronaut.security]
+authentication = 'idtoken'
+
+[micronaut.security.oauth2.clients.entraid]
+client-id = '${HRAPP_CLIENT_ID}'
+client-secret = '${HRAPP_CLIENT_SECRET}'
+
+[micronaut.security.oauth2.clients.entraid.openid]
+issuer = 'https://login.microsoftonline.com/${HRAPP_TENANT_ID}/v2.0/'
+
+# Datasource
+[datasources.default]
+jdbc-url = 'jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=tcps)(HOST=localhost)(PORT=2484))(SECURITY=(TLS_SERVER_CERT_DN="CN=localhost,O=Oracle,C=US")(TOKEN_AUTH=AZURE_SERVICE_PRINCIPAL)(AZURE_DB_APP_ID_URI=${DB_APP_ID_URI})(TENANT_ID=${HRAPP_TENANT_ID}))(CONNECT_DATA=(SERVICE_NAME=freepdb1)))'
+
+[datasources.default.data-source-properties]
+# OJDBC Extensions
+"oracle.jdbc.provider.endUserSecurityContext" = 'ojdbc-provider-micronaut-end-user-security-context'
+"oracle.jdbc.provider.endUserSecurityContext.clientId" = '${HRAPP_CLIENT_ID}'
+"oracle.jdbc.provider.endUserSecurityContext.clientSecret" = '${HRAPP_CLIENT_SECRET}'
+"oracle.jdbc.provider.endUserSecurityContext.tokenUrl" = 'https://login.microsoftonline.com/${HRAPP_TENANT_ID}/oauth2/v2.0/token'
+"oracle.jdbc.provider.endUserSecurityContext.scope" = '${HRAPP_SCOPE}'
+
+# Oracle JDBC
+"oracle.net.wallet_location" = '${ORACLE_WALLET_TRUSTSTORE}'
+"oracle.jdbc.clientId" = '${HRAPP_CLIENT_ID}'
+"oracle.jdbc.clientSecret" = '${HRAPP_CLIENT_SECRET}'
+"oracle.jdbc.tokenAuthentication" = 'AZURE_SERVICE_PRINCIPAL'
+"oracle.jdbc.tenantId" = '${HRAPP_TENANT_ID}'
+"oracle.jdbc.azureDatabaseApplicationIdUri" = '${DB_APP_ID_URI}'
